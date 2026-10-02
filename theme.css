@@ -130,6 +130,87 @@ input:focus-visible {
 .result-summary article:nth-child(2) { background: var(--white); transform: none; }
 .toast { box-shadow: none; }
 
+.result-intro,
+.unanswered-note,
+.no-featured {
+  color: var(--muted);
+}
+
+.score-counts {
+  display: grid;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.score-counts article {
+  display: grid;
+  grid-template-columns: 46px 1fr auto;
+  align-items: baseline;
+  gap: 6px;
+  padding: 14px 18px;
+  background: var(--white);
+  border: 1px solid rgba(23, 52, 95, 0.24);
+  border-radius: 10px;
+}
+
+.score-counts article b {
+  font: 700 26px "DM Mono", monospace;
+  color: var(--violet);
+}
+
+.score-counts article span { color: var(--muted); }
+.score-counts article strong { font-size: 16px; }
+.unanswered-note { margin-top: 14px; font-size: 13px; }
+
+.featured-answer {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin: 28px 0;
+  padding: 22px 26px;
+  background: var(--white);
+  border: 3px solid var(--violet);
+  border-radius: 16px;
+}
+
+.featured-answer .crown {
+  flex: 0 0 auto;
+  font-size: 54px;
+  line-height: 1;
+  color: var(--coral);
+}
+
+.featured-answer small { color: var(--muted); }
+.featured-answer h2 { margin: 4px 0; font-size: 28px; }
+.featured-answer p { margin: 0; }
+.featured-answer p b { color: var(--violet); }
+
+.revealed-answers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.answer-row {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--white);
+  border: 1px solid rgba(23, 52, 95, 0.24);
+  border-radius: 10px;
+}
+
+.answer-row.is-featured { border: 2px solid var(--violet); }
+.answer-row strong { color: var(--violet); }
+
+@media (max-width: 560px) {
+  .revealed-answers { grid-template-columns: 1fr; }
+  .featured-answer { align-items: flex-start; padding: 18px; }
+  .featured-answer .crown { font-size: 40px; }
+}
+
 @media (max-width: 720px) {
   .entry-shell,
   .home-shell,
