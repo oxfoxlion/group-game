@@ -124,7 +124,7 @@ function renderLobby() {
   const isHost = state.room.hostId === state.playerId;
   const allReady = state.room.players.length >= 2 && state.room.players.every((p) => p.ready || p.id === state.room.hostId);
   app.innerHTML = `<section class="room-shell">
-    <div class="room-top"><div><p class="eyebrow">房間代碼</p><button id="copy-code" class="room-code">${state.room.code} <span>複製</span></button></div><div class="room-note"><b>${state.room.players.length}</b><span>位玩家<br>已經入座</span></div></div>
+    <div class="room-top"><div><p class="eyebrow">房間代碼</p><button id="copy-code" class="room-code">${state.room.code} <span>複製</span></button></div><div class="room-note"><b>${state.room.players.length}</b><span>位玩家已經入座</span></div></div>
     <div class="lobby-grid"><div><h1>等大家進來就開始</h1><p>全員準備後，房主就可以開始。每題只有 10 秒，憑直覺回答。</p></div><div class="player-panel"><div class="panel-title"><span>玩家</span><span>${state.room.players.filter(p => p.ready).length}/${state.room.players.length} 準備</span></div><ul>${playerCards()}</ul></div></div>
     <div class="sticky-actions">
       ${isHost ? `<button id="start-game" class="primary" ${allReady ? '' : 'disabled'}>${allReady ? '開始遊戲' : state.room.players.length < 2 ? '再等一位玩家' : '等待所有人準備'}</button>` : `<button id="ready" class="primary ${me?.ready ? 'is-ready' : ''}">${me?.ready ? '取消準備' : '我準備好了'}</button>`}
