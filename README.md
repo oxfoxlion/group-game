@@ -8,7 +8,7 @@
 2. 在本專案複製 `.env.example` 為 `.env.local`。
 3. 執行 `npm run dev`，開啟 Vite 顯示的網址。
 
-題目位於 [`questions.md`](./questions.md)。每題用 `##` 開頭，下一行用 `左：...｜右：...` 設定刻度兩端說明，最多讀取 10 題。
+題目位於 [`public/questions.md`](./public/questions.md)。每題用 `##` 開頭，下一行用 `左：...｜右：...` 設定刻度兩端說明，最多讀取 10 題。`public/` 內的題庫會在 production build 時複製到部署產物。
 
 ## Vercel
 

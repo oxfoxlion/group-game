@@ -33,11 +33,14 @@ function persistProfile() {
 }
 
 async function loadQuestions() {
-  const markdown = await fetch('/questions.md').then((res) => res.text());
+  const response = await fetch('/questions.md');
+  if (!response.ok) throw new Error(`題庫讀取失敗：HTTP ${response.status}`);
+  const markdown = await response.text();
   state.questions = [...markdown.matchAll(/^##\s+(.+)\n+([^\n]+)/gm)].map((match) => {
     const [left = '完全不會', right = '非常可能'] = match[2].split('｜').map((part) => part.replace(/^(左|右)：/, '').trim());
     return { text: match[1].trim(), left, right };
   }).slice(0, 10);
+  if (!state.questions.length) throw new Error('題庫中沒有符合格式的題目');
 }
 
 function connectAnd(action) {
@@ -80,7 +83,7 @@ function profileMarkup(title, subtitle) {
 }
 
 function renderWelcome() {
-  app.innerHTML = profileMarkup('你們，真的<br><em>同頻嗎？</em>', '沒有標準答案。選一個刻度，看看朋友眼中的世界離你多遠。');
+  app.innerHTML = profileMarkup('最近如何?<br><em>一起研究吧！</em>', '沒有標準答案。選一個刻度，用問題認識朋友。');
   document.querySelector('#profile-form').addEventListener('submit', (event) => {
     event.preventDefault();
     state.nickname = new FormData(event.currentTarget).get('nickname').trim();
