@@ -5,6 +5,7 @@ const toastEl = document.querySelector('#toast');
 const connectionEl = document.querySelector('#connection');
 const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
 const socket = io(socketUrl, { autoConnect: false, path: '/group-game/socket.io', transports: ['websocket', 'polling'] });
+const ANSWER_TIME_MS = 30_000;
 
 const saved = JSON.parse(localStorage.getItem('same-frequency-player') || '{}');
 const state = {
@@ -114,7 +115,7 @@ function renderJoining() {
 function renderHome() {
   const inviteCode = new URLSearchParams(location.search).get('room');
   app.innerHTML = `<section class="home-shell">
-    <div class="hello"><p class="eyebrow">嗨，${escapeHtml(state.nickname)}</p><h1>${inviteCode ? '朋友正在等你' : '最近如何？'}</h1><p>${inviteCode ? `加入房間 ${escapeHtml(inviteCode)}，準備好就能開始。` : '每題 10 秒的最近如何快問快答，一起來問問自己：最近如何?'}</p></div>
+    <div class="hello"><p class="eyebrow">嗨，${escapeHtml(state.nickname)}</p><h1>${inviteCode ? '朋友正在等你' : '最近如何？'}</h1><p>${inviteCode ? `加入房間 ${escapeHtml(inviteCode)}，準備好就能開始。` : '每題 30 秒，大家都選好就會直接結束。'}</p></div>
     <div class="action-grid">
       ${inviteCode ? `<button id="join-invite" class="choice-card coral"><span class="choice-icon">↗</span><b>加入 ${escapeHtml(inviteCode)}</b><small>使用邀請連結進入</small></button>` : ''}
       <button id="create-room" class="choice-card violet"><span class="choice-icon">＋</span><b>開新房間</b><small>你會成為房主</small></button>
@@ -154,7 +155,7 @@ function renderLobby() {
   const allReady = state.room.players.length >= 2 && state.room.players.every((p) => p.ready || p.id === state.room.hostId);
   app.innerHTML = `<section class="room-shell">
     <div class="room-top"><div><p class="eyebrow">房間代碼</p><button id="copy-code" class="room-code">${state.room.code} <span>複製</span></button></div><div class="room-note"><b>${state.room.players.length}</b><span>位玩家已經入座</span></div></div>
-    <div class="lobby-grid"><div><h1>等大家進來就開始</h1><p>全員準備後，房主就可以開始。每題只有 10 秒，憑直覺回答。</p></div><div class="player-panel"><div class="panel-title"><span>玩家</span><span>${state.room.players.filter(p => p.ready).length}/${state.room.players.length} 準備</span></div><ul>${playerCards()}</ul></div></div>
+    <div class="lobby-grid"><div><h1>等大家進來就開始</h1><p>全員準備後，房主就可以開始。每題有 30 秒，大家都選好就會直接結束。</p></div><div class="player-panel"><div class="panel-title"><span>玩家</span><span>${state.room.players.filter(p => p.ready).length}/${state.room.players.length} 準備</span></div><ul>${playerCards()}</ul></div></div>
     <div class="sticky-actions">
       ${isHost ? `<button id="start-game" class="primary" ${allReady ? '' : 'disabled'}>${allReady ? '開始遊戲' : state.room.players.length < 2 ? '再等一位玩家' : '等待所有人準備'}</button>` : `<button id="ready" class="primary ${me?.ready ? 'is-ready' : ''}">${me?.ready ? '取消準備' : '我準備好了'}</button>`}
       <button id="leave" class="text-button">離開房間</button>
@@ -170,7 +171,7 @@ function renderQuestion() {
   const q = state.questions[state.room.questionIndex] || { text: '這一題，你會選幾分？', left: '完全不會', right: '非常可能' };
   const answered = state.room.players.filter((p) => p.answered).length;
   app.innerHTML = `<section class="game-shell">
-    <div class="game-meta"><span>第 ${state.room.questionIndex + 1} 題／共 ${state.room.questionCount} 題</span><div class="timer"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19"></circle><circle id="timer-ring" cx="22" cy="22" r="19"></circle></svg><b id="seconds">10</b></div><span><b id="answered-count">${answered}</b>/${state.room.players.length} 已作答</span></div>
+    <div class="game-meta"><span>第 ${state.room.questionIndex + 1} 題／共 ${state.room.questionCount} 題</span><div class="timer"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19"></circle><circle id="timer-ring" cx="22" cy="22" r="19"></circle></svg><b id="seconds">30</b></div><span><b id="answered-count">${answered}</b>/${state.room.players.length} 已作答</span></div>
     <div class="question-card"><span class="quote">“</span><h1>${escapeHtml(q.text)}</h1></div>
     <div class="scale-wrap"><div class="scale-labels"><span>${escapeHtml(q.left)}</span><span>${escapeHtml(q.right)}</span></div><div class="number-scale">${Array.from({ length: 10 }, (_, i) => `<button data-score="${i + 1}" class="${state.selected === i + 1 ? 'selected' : ''}"><i></i><b>${i + 1}</b></button>`).join('')}</div><p id="answer-hint">${state.selected ? `目前選擇 ${state.selected}，倒數結束前都可以修改。` : '選一個最符合你現在感受的數字。'}</p></div>
   </section>`;
@@ -185,7 +186,7 @@ function updateTimer() {
   const el = document.querySelector('#seconds');
   const ring = document.querySelector('#timer-ring');
   if (el) el.textContent = seconds;
-  if (ring) ring.style.strokeDashoffset = 119.4 * (1 - left / 10000);
+  if (ring) ring.style.strokeDashoffset = 119.4 * (1 - left / ANSWER_TIME_MS);
   if (left > 0) requestAnimationFrame(updateTimer);
 }
 
