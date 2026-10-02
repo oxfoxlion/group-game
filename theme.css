@@ -204,6 +204,8 @@ input:focus-visible {
 
 .answer-row.is-featured { border: 2px solid var(--violet); }
 .answer-row strong { color: var(--violet); }
+.answer-row.is-unanswered { opacity: 0.62; }
+.answer-row.is-unanswered strong { color: var(--muted); font-size: 13px; }
 
 @media (max-width: 560px) {
   .revealed-answers { grid-template-columns: 1fr; }
