@@ -91,6 +91,8 @@ function renderWelcome() {
     persistProfile();
     state.screen = 'home';
     render();
+    const inviteCode = new URLSearchParams(location.search).get('room');
+    if (inviteCode) joinRoom(inviteCode);
   });
 }
 
@@ -171,6 +173,7 @@ function renderResult() {
   if (!isRevealed) {
     app.innerHTML = `<section class="result-shell anonymous-result">
       <p class="eyebrow">匿名統計</p><h1>${escapeHtml(q.text)}</h1>
+      <div class="result-scale-guide"><span><b>1 分</b>${escapeHtml(q.left || '低')}</span><i aria-hidden="true"></i><span><b>10 分</b>${escapeHtml(q.right || '高')}</span></div>
       <p class="result-intro">大家都選完了，先看看分數分布。</p>
       <div class="score-counts">${counts.length ? counts.map(({ score, count }) => `<article><b>${score}</b><span>分</span><strong>${count} 位</strong></article>`).join('') : '<p class="waiting-copy">這題沒有人完成作答。</p>'}</div>
       ${unansweredCount ? `<p class="unanswered-note">另有 ${unansweredCount} 位未作答</p>` : ''}
@@ -188,6 +191,7 @@ function renderResult() {
   });
   app.innerHTML = `<section class="result-shell">
     <p class="eyebrow">第 ${state.room.questionIndex + 1} 題揭曉</p><h1>${escapeHtml(q.text)}</h1>
+    <div class="result-scale-guide"><span><b>1 分</b>${escapeHtml(q.left || '低')}</span><i aria-hidden="true"></i><span><b>10 分</b>${escapeHtml(q.right || '高')}</span></div>
     ${featured ? `<article class="featured-answer"><span class="crown" aria-hidden="true">♛</span><div><small>這題請${featured.players.length > 1 ? '你們' : '你'}分享</small><h2>${featured.players.map((player) => escapeHtml(player.nickname)).join('、')}</h2><p>${featured.players.length > 1 ? '你們都' : '你'}選了 <b>${featured.score} 分</b>，為什麼是這個數字？</p></div></article>` : '<p class="no-featured">這題沒有一人或兩人選擇的數字，大家自由分享吧！</p>'}
     <div class="revealed-answers">${results.length ? results.map((result) => `<article class="answer-row ${featured?.players.some((player) => player.id === result.id) ? 'is-featured' : ''} ${result.score == null ? 'is-unanswered' : ''}"><span class="avatar" style="--h:${hashHue(result.id)}">${escapeHtml(result.nickname[0])}</span><b>${escapeHtml(result.nickname)}</b><strong>${result.score == null ? '未作答' : `${result.score} 分`}</strong></article>`).join('') : '<p class="waiting-copy">這題沒有玩家。</p>'}</div>
     <div class="sticky-actions">${isHost ? `<button id="next" class="primary">${state.room.questionIndex + 1 >= state.room.questionCount ? '看遊戲總結' : '下一題'} <span>→</span></button>` : '<p class="waiting-copy">等房主帶大家進入下一題…</p>'}</div>
@@ -217,3 +221,5 @@ socket.on('room:closed', ({ message }) => { toast(message); state.room = null; s
 await loadQuestions().catch(() => { state.questions = []; toast('題庫讀取失敗'); });
 state.screen = state.nickname ? 'home' : 'welcome';
 render();
+const initialInviteCode = new URLSearchParams(location.search).get('room');
+if (state.nickname && initialInviteCode) joinRoom(initialInviteCode);
