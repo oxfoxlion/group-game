@@ -212,6 +212,24 @@ input:focus-visible {
 }
 
 @media (max-width: 720px) {
+  main {
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+
+  .site-header {
+    padding: 0 14px;
+    gap: 10px;
+  }
+
+  .brand {
+    min-width: 0;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .brand span { font-size: 21px; }
+  .connection { flex: 0 0 auto; font-size: 10px; }
+
   .entry-shell,
   .home-shell,
   .room-shell,
@@ -221,7 +239,108 @@ input:focus-visible {
     width: min(92vw, 680px);
     border-radius: 16px;
     padding: 22px;
+    margin-bottom: 24px;
   }
 
   .entry-shell { gap: 24px; }
+
+  .intro h1,
+  .hello h1,
+  .lobby-grid h1,
+  .finish-shell h1 {
+    font-size: clamp(36px, 12vw, 48px);
+    overflow-wrap: anywhere;
+  }
+
+  .paper-card { padding: 20px; }
+
+  .room-top {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .room-code { font-size: clamp(28px, 10vw, 38px); }
+  .room-note { gap: 6px; }
+  .room-note b { font-size: 36px; }
+
+  .game-meta { gap: 8px; }
+  .timer, .timer svg { width: 50px; height: 50px; }
+
+  .question-card {
+    margin: 36px auto 42px;
+  }
+
+  .question-card h1 {
+    font-size: clamp(26px, 8vw, 36px);
+    overflow-wrap: anywhere;
+  }
+
+  .scale-labels {
+    align-items: flex-end;
+    gap: 16px;
+  }
+
+  .scale-labels span {
+    width: 46%;
+    line-height: 1.4;
+  }
+
+  .scale-labels span:last-child { text-align: right; }
+  .number-scale { margin-inline: 4px; }
+
+  .number-scale button:hover i,
+  .number-scale button.selected i {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 3px var(--white);
+  }
+
+  .sticky-actions .primary {
+    width: 100%;
+    min-width: 0;
+    max-width: 320px;
+  }
+
+  .featured-answer > div,
+  .answer-row b {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .answer-row {
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    gap: 9px;
+    padding: 10px;
+  }
+
+  .answer-row .avatar { width: 38px; height: 38px; }
+
+  .score-counts article {
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    padding: 12px 14px;
+  }
+
+  .toast {
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    text-align: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .connection span { display: none; }
+
+  .entry-shell,
+  .home-shell,
+  .room-shell,
+  .game-shell,
+  .result-shell,
+  .finish-shell {
+    width: 94vw;
+    padding: 18px;
+  }
+
+  .featured-answer {
+    gap: 12px;
+    padding: 15px;
+  }
 }
