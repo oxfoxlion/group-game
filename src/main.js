@@ -49,10 +49,18 @@ function connectAnd(action) {
   else socket.once('connect', action);
 }
 
-function emitAck(event, payload, onSuccess) {
+function emitAck(event, payload, onSuccess, onFailure) {
   socket.timeout(5000).emit(event, payload, (error, response) => {
-    if (error) return toast('伺服器沒有回應，請再試一次');
-    if (!response?.ok) return toast(response?.message || '操作沒有成功');
+    if (error) {
+      toast('伺服器沒有回應，請再試一次');
+      onFailure?.();
+      return;
+    }
+    if (!response?.ok) {
+      toast(response?.message || '操作沒有成功');
+      onFailure?.();
+      return;
+    }
     onSuccess?.(response);
   });
 }
@@ -89,11 +97,18 @@ function renderWelcome() {
     state.nickname = new FormData(event.currentTarget).get('nickname').trim();
     if (!state.nickname) return;
     persistProfile();
-    state.screen = 'home';
-    render();
     const inviteCode = new URLSearchParams(location.search).get('room');
-    if (inviteCode) joinRoom(inviteCode);
+    if (inviteCode) joinRoom(inviteCode, true);
+    else {
+      state.screen = 'home';
+      render();
+    }
   });
+}
+
+function renderJoining() {
+  const inviteCode = new URLSearchParams(location.search).get('room');
+  app.innerHTML = `<section class="finish-shell"><p class="eyebrow">房間 ${escapeHtml(inviteCode || '')}</p><h1>正在加入房間…</h1><p>正在連線，請稍候。</p></section>`;
 }
 
 function renderHome() {
@@ -113,8 +128,20 @@ function renderHome() {
   document.querySelector('#change-name').onclick = () => { state.screen = 'welcome'; render(); };
 }
 
-function joinRoom(code) {
-  connectAnd(() => emitAck('room:join', { code: code.trim().toUpperCase(), playerId: state.playerId, nickname: state.nickname }, ({ room }) => enterRoom(room)));
+function joinRoom(code, showJoining = false) {
+  if (showJoining) {
+    state.screen = 'joining';
+    render();
+  }
+  connectAnd(() => emitAck(
+    'room:join',
+    { code: code.trim().toUpperCase(), playerId: state.playerId, nickname: state.nickname },
+    ({ room }) => enterRoom(room),
+    () => {
+      state.screen = 'home';
+      render();
+    },
+  ));
 }
 
 function playerCards() {
@@ -207,7 +234,7 @@ function renderFinished() {
 function hashHue(value) {
   return ([...value].reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0) >>> 0) % 360;
 }
-function render() { ({ welcome: renderWelcome, home: renderHome, lobby: renderLobby, question: renderQuestion, result: renderResult, finished: renderFinished }[state.screen] || renderHome)(); }
+function render() { ({ welcome: renderWelcome, joining: renderJoining, home: renderHome, lobby: renderLobby, question: renderQuestion, result: renderResult, finished: renderFinished }[state.screen] || renderHome)(); }
 
 socket.on('connect', () => { connectionEl.classList.add('online'); connectionEl.querySelector('span').textContent = '已連線'; });
 socket.on('disconnect', () => { connectionEl.classList.remove('online'); connectionEl.querySelector('span').textContent = '重新連線中'; });
@@ -219,7 +246,7 @@ socket.on('game:finished', (room) => enterRoom(room));
 socket.on('room:closed', ({ message }) => { toast(message); state.room = null; state.screen = 'home'; history.replaceState({}, '', '/'); render(); });
 
 await loadQuestions().catch(() => { state.questions = []; toast('題庫讀取失敗'); });
-state.screen = state.nickname ? 'home' : 'welcome';
-render();
 const initialInviteCode = new URLSearchParams(location.search).get('room');
+state.screen = state.nickname ? (initialInviteCode ? 'joining' : 'home') : 'welcome';
+render();
 if (state.nickname && initialInviteCode) joinRoom(initialInviteCode);
