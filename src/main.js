@@ -237,7 +237,22 @@ function hashHue(value) {
 }
 function render() { ({ welcome: renderWelcome, joining: renderJoining, home: renderHome, lobby: renderLobby, question: renderQuestion, result: renderResult, finished: renderFinished }[state.screen] || renderHome)(); }
 
-socket.on('connect', () => { connectionEl.classList.add('online'); connectionEl.querySelector('span').textContent = '已連線'; });
+socket.on('connect', () => {
+  connectionEl.classList.add('online');
+  connectionEl.querySelector('span').textContent = '已連線';
+  if (!state.room) return;
+  emitAck(
+    'room:join',
+    { code: state.room.code, playerId: state.playerId, nickname: state.nickname },
+    ({ room }) => enterRoom(room),
+    () => {
+      state.room = null;
+      state.screen = 'home';
+      history.replaceState({}, '', '/');
+      render();
+    },
+  );
+});
 socket.on('disconnect', () => { connectionEl.classList.remove('online'); connectionEl.querySelector('span').textContent = '重新連線中'; });
 socket.on('room:update', (room) => enterRoom(room));
 socket.on('game:question', (room) => { state.selected = null; enterRoom(room); });
